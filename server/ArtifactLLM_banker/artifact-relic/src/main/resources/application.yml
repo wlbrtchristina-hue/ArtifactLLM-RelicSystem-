@@ -1,0 +1,13 @@
+spring:
+  application:
+    name: artifact-relic
+  datasource: #数据库配置
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/artifactllm1?useUnicode=true&characterEncoding=utf-8&zeroDateTimeBehavior=convertToNull&transformedBitIsBoolean=true&allowMultiQueries=true&useSSL=false&allowPublicKeyRetrieval=true
+    username: root
+    password: lzl167617
+
+
+#服务端口配置
+server:
+  port: 8080

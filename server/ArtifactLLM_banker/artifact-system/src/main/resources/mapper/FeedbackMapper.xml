@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hnu.artifactsystem.mapper.FeedbackMapper">
+
+    <!-- 分页查询反馈列表（包含用户名和处理人姓名） -->
+    <select id="selectFeedbackPage" resultType="cn.edu.hnu.artifactsystem.vo.FeedbackVO">
+        SELECT 
+            f.id,
+            f.user_id,
+            u.username,
+            f.feedback_type,
+            CASE 
+                WHEN f.feedback_type = 0 THEN '建议'
+                WHEN f.feedback_type = 1 THEN '问题'
+                WHEN f.feedback_type = 2 THEN '功能需求'
+                ELSE '未知'
+            END AS feedback_type_name,
+            f.feedback_title,
+            f.feedback_content,
+            f.contact_info,
+            f.submitted_at,
+            f.status,
+            CASE 
+                WHEN f.status = 0 THEN '待处理'
+                WHEN f.status = 1 THEN '处理中'
+                WHEN f.status = 2 THEN '已解决'
+                WHEN f.status = 3 THEN '已关闭'
+                ELSE '未知'
+            END AS status_name,
+            f.processed_by,
+            pu.username AS processed_by_name,
+            f.processed_at,
+            f.process_result,
+            CASE 
+                WHEN fe.id IS NOT NULL THEN true
+                ELSE false
+            END AS evaluated
+        FROM feedback f
+        LEFT JOIN sys_user u ON f.user_id = u.id
+        LEFT JOIN sys_user pu ON f.processed_by = pu.id
+        LEFT JOIN feedback_evaluation fe ON f.id = fe.feedback_id
+        <where>
+            <if test="feedbackType != null">
+                AND f.feedback_type = #{feedbackType}
+            </if>
+            <if test="status != null">
+                AND f.status = #{status}
+            </if>
+            <if test="userId != null">
+                AND f.user_id = #{userId}
+            </if>
+            <if test="processedBy != null">
+                AND f.processed_by = #{processedBy}
+            </if>
+            <if test="keyword != null and keyword != ''">
+                AND (f.feedback_title LIKE CONCAT('%', #{keyword}, '%') 
+                     OR f.feedback_content LIKE CONCAT('%', #{keyword}, '%'))
+            </if>
+            <if test="startTime != null and startTime != ''">
+                AND f.submitted_at >= #{startTime}
+            </if>
+            <if test="endTime != null and endTime != ''">
+                AND f.submitted_at &lt;= #{endTime}
+            </if>
+        </where>
+        ORDER BY f.submitted_at DESC
+    </select>
+
+    <!-- 根据ID查询反馈详情（包含用户名和处理人姓名） -->
+    <select id="selectFeedbackById" resultType="cn.edu.hnu.artifactsystem.vo.FeedbackVO">
+        SELECT 
+            f.id,
+            f.user_id,
+            u.username,
+            f.feedback_type,
+            CASE 
+                WHEN f.feedback_type = 0 THEN '建议'
+                WHEN f.feedback_type = 1 THEN '问题'
+                WHEN f.feedback_type = 2 THEN '功能需求'
+                ELSE '未知'
+            END AS feedback_type_name,
+            f.feedback_title,
+            f.feedback_content,
+            f.contact_info,
+            f.submitted_at,
+            f.status,
+            CASE 
+                WHEN f.status = 0 THEN '待处理'
+                WHEN f.status = 1 THEN '处理中'
+                WHEN f.status = 2 THEN '已解决'
+                WHEN f.status = 3 THEN '已关闭'
+                ELSE '未知'
+            END AS status_name,
+            f.processed_by,
+            pu.username AS processed_by_name,
+            f.processed_at,
+            f.process_result,
+            CASE 
+                WHEN fe.id IS NOT NULL THEN true
+                ELSE false
+            END AS evaluated
+        FROM feedback f
+        LEFT JOIN sys_user u ON f.user_id = u.id
+        LEFT JOIN sys_user pu ON f.processed_by = pu.id
+        LEFT JOIN feedback_evaluation fe ON f.id = fe.feedback_id
+        WHERE f.id = #{id}
+    </select>
+
+    <!-- 批量更新反馈状态 -->
+    <update id="batchUpdateStatus">
+        UPDATE feedback 
+        SET status = #{status}, 
+            processed_by = #{processedBy},
+            processed_at = NOW()
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </update>
+
+    <!-- 统计各状态反馈数量 -->
+    <select id="countByStatus" resultType="map">
+        SELECT status, COUNT(*) AS count
+        FROM feedback
+        GROUP BY status
+    </select>
+
+    <!-- 统计各类型反馈数量 -->
+    <select id="countByType" resultType="map">
+        SELECT feedback_type, COUNT(*) AS count
+        FROM feedback
+        GROUP BY feedback_type
+    </select>
+
+</mapper>

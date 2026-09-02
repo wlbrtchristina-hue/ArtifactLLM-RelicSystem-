@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hnu.artifactrelic.mapper.CulturalRelicsMapper">
+
+    <resultMap id="RelicsBasicVOMap" type="cn.edu.hnu.artifactrelic.vo.RelicsBasicVO">
+        <id property="relicsId" column="relics_id"/>
+        <result property="relicsName" column="relics_name"/>
+        <result property="era" column="era"/>
+        <result property="material" column="material"/>
+        <result property="discoverySite" column="discovery_site"/>
+        <result property="typeName" column="type_name"/>
+        <result property="createdAt" column="created_at"/>
+    </resultMap>
+
+    <select id="selectByCondition" resultMap="RelicsBasicVOMap">
+        SELECT
+        cr.relics_id,
+        cr.relics_name,
+        cr.era,
+        rt.type_name,
+        cr.created_at
+        FROM cultural_relics cr
+        LEFT JOIN relics_type rt ON cr.relics_type_id = rt.relics_type_id AND rt.is_deleted = 0
+        WHERE cr.is_deleted = 0
+        <if test="query.era != null and query.era != ''">
+            AND cr.era LIKE CONCAT('%', #{query.era}, '%')
+        </if>
+        <if test="query.relicsTypeId != null">
+            AND cr.relics_type_id = #{query.relicsTypeId}
+        </if>
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <select id="semanticSearch" resultMap="RelicsBasicVOMap">
+        SELECT
+        cr.relics_id,
+        cr.relics_name,
+        cr.era,
+        rt.type_name,
+        cr.created_at
+        FROM cultural_relics cr
+        LEFT JOIN relics_type rt ON cr.relics_type_id = rt.relics_type_id AND rt.is_deleted = 0
+        WHERE cr.is_deleted = 0
+        <if test="tokens != null and tokens.size() &gt; 0">
+            AND (
+            <foreach collection="tokens" item="tk" separator=" OR ">
+                cr.relics_name LIKE CONCAT('%', #{tk}, '%')
+                OR rt.type_name LIKE CONCAT('%', #{tk}, '%')
+                OR cr.era LIKE CONCAT('%', #{tk}, '%')
+            </foreach>
+            )
+        </if>
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <select id="selectByNameExact" resultMap="RelicsBasicVOMap">
+        SELECT
+        cr.relics_id,
+        cr.relics_name,
+        cr.era,
+        rt.type_name,
+        cr.created_at
+        FROM cultural_relics cr
+        LEFT JOIN relics_type rt ON cr.relics_type_id = rt.relics_type_id AND rt.is_deleted = 0
+        WHERE cr.is_deleted = 0
+        AND cr.relics_name = #{name}
+        ORDER BY cr.created_at DESC
+    </select>
+
+    <select id="selectRelatedByTypeOrEra" resultMap="RelicsBasicVOMap">
+        SELECT
+        cr.relics_id,
+        cr.relics_name,
+        cr.era,
+        rt.type_name,
+        cr.created_at
+        FROM cultural_relics cr
+        LEFT JOIN relics_type rt ON cr.relics_type_id = rt.relics_type_id AND rt.is_deleted = 0
+        WHERE cr.is_deleted = 0
+        <if test="excludeIds != null and excludeIds.size() &gt; 0">
+            AND cr.relics_id NOT IN
+            <foreach collection="excludeIds" item="eid" open="(" separator="," close=")">
+                #{eid}
+            </foreach>
+        </if>
+        <trim prefix="AND (" suffix=")" prefixOverrides="AND|OR">
+            <if test="typeName != null and typeName != ''">
+                rt.type_name = #{typeName}
+            </if>
+            <if test="era != null and era != ''">
+                <if test="typeName != null and typeName != ''">
+                    OR
+                </if>
+                cr.era = #{era}
+            </if>
+        </trim>
+        ORDER BY cr.created_at DESC
+    </select>
+
+</mapper>

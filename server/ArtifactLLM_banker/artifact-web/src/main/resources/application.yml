@@ -1,0 +1,50 @@
+server:
+  port: 8080
+
+spring:
+  application:
+    name: artifact-web
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/artifactllm1?useUnicode=true&characterEncoding=utf-8&useSSL=false&serverTimezone=Asia/Shanghai
+    username: root
+    password: lzl167617
+
+
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: artifactllm
+
+
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 0
+
+  mail:
+    host: smtp.qq.com
+    username: 923373251@qq.com
+    password: kyzapmavjwxcbbdb
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+mybatis-plus:
+  mapper-locations: classpath*:/mapper/**/*.xml
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+ai:
+  deepseek:
+    api-key: sk-6f015483467b42c899233139feacfe11
+    base-url: https://api.deepseek.com
+    model: deepseek-chat
+    max-tokens: 2048
+    temperature: 0.7

@@ -1,0 +1,40 @@
+# 敏感信息（各模块配置文件，仅保留 .example 模板）
+application*.properties
+!**/application*.properties.example
+
+# IDE
+.idea/
+.vscode/
+*.iml
+*.iws
+*.ipr
+out/
+
+# Maven / Java 构建产物
+target/
+*.class
+*.jar
+*.war
+.mvn/
+mvnw
+mvnw.cmd
+
+# Node / 前端构建产物
+node_modules/
+dist/
+.nuxt/
+.output/
+
+# 日志与缓存
+logs/
+*.log
+*.tmp
+*.bak
+.cache/
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 环境变量
+.env
+.env.*

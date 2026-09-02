@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="cn.edu.hnu.artifactsystem.mapper.FeedbackEvaluationMapper">
+
+    <!-- 根据反馈ID查询评价列表 -->
+    <select id="selectByFeedbackId" resultType="cn.edu.hnu.artifactsystem.entity.FeedbackEvaluation">
+        SELECT id, feedback_id, user_id, rating, comment, evaluation_time
+        FROM feedback_evaluation
+        WHERE feedback_id = #{feedbackId}
+        ORDER BY evaluation_time DESC
+    </select>
+
+    <!-- 根据用户ID查询评价列表 -->
+    <select id="selectByUserId" resultType="cn.edu.hnu.artifactsystem.entity.FeedbackEvaluation">
+        SELECT id, feedback_id, user_id, rating, comment, evaluation_time
+        FROM feedback_evaluation
+        WHERE user_id = #{userId}
+        ORDER BY evaluation_time DESC
+    </select>
+
+    <!-- 检查用户是否已评价该反馈 -->
+    <select id="countByFeedbackIdAndUserId" resultType="int">
+        SELECT COUNT(*)
+        FROM feedback_evaluation
+        WHERE feedback_id = #{feedbackId} AND user_id = #{userId}
+    </select>
+
+    <!-- 统计反馈评价的平均分 -->
+    <select id="avgRatingByFeedbackId" resultType="java.lang.Double">
+        SELECT AVG(rating)
+        FROM feedback_evaluation
+        WHERE feedback_id = #{feedbackId}
+    </select>
+
+    <!-- 统计处理人的评价平均分 -->
+    <select id="avgRatingByProcessedBy" resultType="map">
+        SELECT AVG(fe.rating) as avgRating, COUNT(*) as count
+        FROM feedback_evaluation fe
+        INNER JOIN feedback f ON fe.feedback_id = f.id
+        WHERE f.processed_by = #{processedBy}
+    </select>
+
+    <!-- 统计反馈评价的评分分布 -->
+    <select id="getRatingStatistics" resultType="map">
+        SELECT rating, COUNT(*) as count
+        FROM feedback_evaluation
+        WHERE feedback_id = #{feedbackId}
+        GROUP BY rating
+        ORDER BY rating
+    </select>
+
+</mapper>

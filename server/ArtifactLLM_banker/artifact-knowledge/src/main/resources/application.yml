@@ -1,0 +1,15 @@
+server:
+  port: 8083
+
+spring:
+  application:
+    name: artifact-knowledge
+  neo4j:
+    uri: bolt://localhost:7687
+    authentication:
+      username: neo4j
+      password: artifactllm
+neo4j:
+  http:
+    base-url: http://localhost:7474
+    commit-path: /db/neo4j/tx/commit
